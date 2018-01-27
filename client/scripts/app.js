@@ -1,9 +1,26 @@
 //Server: http://parse.sfm8.hackreactor.com/
 var apiURL = 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages/';
-var tweets = $.ajax({
-  async: false,
+var tweets;
+$.ajax({
   url: apiURL,
-  type: 'GET'});
+  type: 'GET',
+  success: function (result) {
+    responses = result.results;
+    rooms = [];
+    for (var i = 0; i < responses.length; i++) {
+      if (_.indexOf(rooms, responses[i].roomname ) === -1 && responses[i].roomname) {
+        rooms.push(responses[i].roomname);
+        app.renderMessage(responses[i]);
+      }
+    } 
+    username = window.location.search.slice(10);
+    
+    for (var i = 0; i < rooms.length; i++) {
+      app.renderRoom(rooms[i]);
+    }
+  },
+});
+
 var responses, rooms, username;
 
 var app = {
@@ -14,7 +31,7 @@ var app = {
       if (_.indexOf(rooms, responses[i].roomname ) === -1 && responses[i].roomname) {
         rooms.push(responses[i].roomname);
       }
-    }
+    } 
     username = window.location.search.slice(10);
     
     for (var i = 0; i < rooms.length; i++) {
@@ -49,18 +66,19 @@ var app = {
       data: message,
     });
   },
+  
   server: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
+  
   clearMessages: function() {
     $('#chats').empty();
   },
   renderMessage: function(message) {
-    var $newdiv1 = $("<div id='chats'></div>");
-    $();
+    var $newdiv1 = $("<div class='chat username'>" + message.username + "</div>");
     $('#chats').prepend($newdiv1);
   },
   renderRoom: function(roomname) {
-    var $newoption1 = $("<option id='roomSelect'>" + roomname + "</option>");
-    $('#roomSelect').prepend($newoption1);
+    var $newoption1 = $("<option>" + roomname + "</option>");
+    $('#roomSelect').append($newoption1);
   },
   
 };
@@ -70,4 +88,3 @@ var message = {
   text: 'trololo',
   roomname: '4chan'
 };
-

@@ -27,23 +27,14 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
-      <form action="scripts/app.js">
-        <select>
-          <option value = "Lobby" selected>Lobby</option>
-          
+      <p>Rooms: 
+        <select id = 'roomSelect'>
         </select>
-      <!-- <div class="dropdown">
-        <span>Mouse over me</span>
-        <div class="dropdown-content">
-          <p>Hello World!</p>
-          <p>rooms</p>
-        </div>
-      </div> -->
-
-        <input type="text" id="message" name="message" placeholder="Your message..">
+      </p>
+      <form action="/action_page.php">
+        <input type="text" name="fname">
         <input type="submit" value="Submit">
       </form>
-</div>
     </div>
     <div id="chats"></div>
   </body>
