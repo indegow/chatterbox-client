@@ -1,54 +1,22 @@
-//Server: http://parse.sfm8.hackreactor.com/
+ 
 var apiURL = 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages/';
-var tweets;
-$.ajax({
-  url: apiURL,
-  type: 'GET',
-  success: function (result) {
-    responses = result.results;
-    rooms = [];
-    for (var i = 0; i < responses.length; i++) {
-      if (_.indexOf(rooms, responses[i].roomname ) === -1 && responses[i].roomname) {
-        rooms.push(responses[i].roomname);
-        app.renderMessage(responses[i]);
-      }
-    } 
-    username = window.location.search.slice(10);
-    
-    for (var i = 0; i < rooms.length; i++) {
-      app.renderRoom(rooms[i]);
-    }
-  },
-});
-
 var responses, rooms, username;
+var username = window.location.search.slice(10);
 
 var app = {
-  init: function(tweets) {
-    responses = tweets.responseJSON.results;
-    rooms = [];
-    for (var i = 0; i < responses.length; i++) {
-      if (_.indexOf(rooms, responses[i].roomname ) === -1 && responses[i].roomname) {
-        rooms.push(responses[i].roomname);
-      }
-    } 
-    username = window.location.search.slice(10);
+  init: function() {
+    app.fetch();
     
-    for (var i = 0; i < rooms.length; i++) {
-      app.renderRoom(rooms[i]);
-    }
-    
-  }, 
+  },
   message: function() {
     
   },
-  send: function(message) {
-    
+  send: function(data) {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
-      url: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
+      url: apiURL,
       type: 'POST',
-      data: message,
+      data: JSON.stringify(data),
       contentType: 'application/json',
       success: function (data) {
         console.log('chatterbox: Message sent');
@@ -59,11 +27,33 @@ var app = {
       }
     });
   },
-  fetch: function(message) {
+  fetch: function() {
     $.ajax({
-      url: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
+      url: apiURL,
       type: 'GET',
-      data: message,
+      data: 'order=-createdAt',
+      success: function(result) {
+        console.log(result);
+        responses = result.results;
+        rooms = [];
+        
+        for (var i = 0; i < responses.length; i++) {
+          if (responses[i].username) {
+            responses[i].username = _.escape(responses[i].username);
+          }
+          if (responses[i].text) {
+            var msg = _.escape(responses[i].text);
+            app.renderMessage(responses[i]);
+          }
+          if (_.indexOf(rooms, responses[i].roomname ) === -1 && responses[i].roomname) {
+            rooms.push(responses[i].roomname);
+          }
+        } 
+        for (var i = 0; i < rooms.length; i++) {
+          //var room = _.escape(rooms[i]);
+          app.renderRoom(rooms[i]);
+        }
+      }
     });
   },
   
@@ -73,7 +63,7 @@ var app = {
     $('#chats').empty();
   },
   renderMessage: function(message) {
-    var $newdiv1 = $("<div class='chat username'>" + message.username + "</div>");
+    var $newdiv1 = $("<div class='chat username'>" + message.username + ":<br>" + message.text + "</div>");
     $('#chats').prepend($newdiv1);
   },
   renderRoom: function(roomname) {
@@ -83,8 +73,25 @@ var app = {
   
 };
 
-var message = {
-  username: 'shawndrost',
-  text: 'trololo',
-  roomname: '4chan'
-};
+//Server: http://parse.sfm8.hackreactor.com/
+$(document).ready(function() {
+  
+  $('#submitmessage').click(function() {
+    
+    var messagetext = $("#newmessage").val(); 
+    console.log($("#newmessage").val()); 
+    
+    $('#newmessage').val('');
+    
+    var obj = {
+      username: username,
+      text: messagetext
+    };
+    
+    app.send(obj);
+    app.renderMessage(obj);
+   
+  });
+});
+
+app.init();
